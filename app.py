@@ -13,8 +13,6 @@ if os.path.isfile('save.txt'):
 link = tk.StringVar()
 download_type = "Video"
 
-
-
 def addApp():
     global dirname
     dirname = filedialog.askdirectory(initialdir=os.path.expanduser("~")+"/Downloads/", title="Select Folder")
