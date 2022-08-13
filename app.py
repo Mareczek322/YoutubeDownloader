@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, Text, messagebox
+from tkinter import ACTIVE, DISABLED, filedialog, Text, messagebox
 import os
 from pytube import YouTube
 
@@ -11,6 +11,7 @@ if os.path.isfile('save.txt'):
         dirname = f.read()
 
 link = tk.StringVar()
+download_type = "Video"
 
 
 
@@ -21,11 +22,30 @@ def addApp():
 
 
 def download():
+    print(download_type)
     yt = YouTube(link.get())
-    yd = yt.streams.get_highest_resolution()
-    yd.download(dirname)
+    if download_type == "Video":
+        yd = yt.streams.get_highest_resolution()
+    else:
+        yd = yt.streams.filter(only_audio=True).first()
+    out_file = yd.download(dirname)
+    if download_type == "Audio":
+        base, ext = os.path.splitext(out_file)
+        new_file = base + '.mp3'
+        os.rename(out_file, new_file)
     linkEntry.delete(0, tk.END)
-    messagebox.showinfo("Success!","Video Successfully Downloaded")
+    messagebox.showinfo("Success!",f"{download_type} Successfully Downloaded")
+
+def setType(type):
+    global download_type
+    download_type = type
+    if type == "Video":
+        videoBtn.configure(state=DISABLED)
+        audioBtn.configure(state=ACTIVE)
+    else:
+        videoBtn.configure(state=ACTIVE)
+        audioBtn.configure(state=DISABLED)
+
 
 title = tk.Label(root, text="Youtube Downloader", font=("Arial", 25))
 title.pack()
@@ -40,7 +60,13 @@ openFolder.pack()
 currentDir = tk.Label(root, text=f"Current Directory: {dirname}")
 currentDir.pack()
 
-downloadBtn = tk.Button(root, text="Download", padx=10, pady=5, fg="white", bg="#263D42", command=download)
+videoBtn = tk.Button(root, text="Video", padx=10, pady=5, fg="white", bg="#263D42", state=DISABLED, command=lambda:setType("Video"))
+videoBtn.pack()
+
+audioBtn = tk.Button(root, text="Audio", padx=10, pady=5, fg="white", bg="#263D42", command=lambda:setType("Audio"))
+audioBtn.pack()
+
+downloadBtn = tk.Button(root, text="Download", padx=10, pady=5, fg="white", bg="#263D42", font=("Arial", 25), command=download)
 downloadBtn.pack()
 
 root.mainloop()
